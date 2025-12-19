@@ -15,4 +15,17 @@ public interface ForumxConstant {
     激活失败
      */
     int ACTIVATION_FAILED = 2;
+
+    /*
+    常规cookie保存时间
+     */
+
+    int DEFAULT_EXPIRED_SECOND = 3600 * 12;
+
+    /*
+    记住我，cookie保存时间
+     */
+
+    int REMEMBERME_EXPIRED_SECOND = 3600 * 24 * 100;
+
 }

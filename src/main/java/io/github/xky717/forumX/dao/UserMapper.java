@@ -2,7 +2,6 @@ package io.github.xky717.forumX.dao;
 
 import io.github.xky717.forumX.entity.User;
 import org.apache.ibatis.annotations.Mapper;
-import org.springframework.stereotype.Repository;
 
 @Mapper
 public interface UserMapper {
@@ -14,5 +13,5 @@ public interface UserMapper {
     int insertUser(User user);
     int updateStatus(int id, int status);
     int updateHeader(int id, String headerUrl);
-    int updatePaasword(int id, String password);
+    int updatePassword(int id, String password);
 }

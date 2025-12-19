@@ -1,12 +1,16 @@
 package io.github.xky717.forumX.service;
 
 
+import io.github.xky717.forumX.dao.LoginTicketMapper;
 import io.github.xky717.forumX.dao.UserMapper;
+import io.github.xky717.forumX.entity.LoginTicket;
 import io.github.xky717.forumX.entity.User;
 import io.github.xky717.forumX.util.ForumxConstant;
 import io.github.xky717.forumX.util.ForumxUtil;
 import io.github.xky717.forumX.util.MailClient;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,6 +24,7 @@ import java.util.Random;
 
 @Service
 public class UserService implements ForumxConstant {
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
     @Autowired
     private UserMapper userMapper;
 
@@ -28,6 +33,9 @@ public class UserService implements ForumxConstant {
 
     @Autowired
     private TemplateEngine templateEngine;
+
+    @Autowired
+    private LoginTicketMapper loginTicketMapper;
 
     @Value("${forumx.path.domain}")
     private String domain;
@@ -106,6 +114,56 @@ public class UserService implements ForumxConstant {
         }else {
             return ACTIVATION_FAILED;
         }
+    }
 
+    public Map<String , Object> login(String username, String password, int expiredSeconds) {
+
+        Map<String, Object> map = new HashMap<>();
+        //空值处理
+        if (StringUtils.isBlank(username)) {
+            map.put("usernameMsg", "account cant be empty");
+            return map;
+        }
+        if (StringUtils.isBlank(password)) {
+            map.put("passwordMsg", "password cant be empty");
+            return map;
+        }
+
+        //验证账号
+        User user = userMapper.selectByName(username);
+        if (user == null) {
+            map.put("usernameMsg", "this account not exits.");
+            return map;
+        }
+
+        //验证状态
+        if(user.getStatus()==0){
+            map.put("usernameMsg","account must be activated first ");
+            return map;
+        }
+
+        //验证密码
+        password = ForumxUtil.md5(password+user.getSalt());
+        if(!user.getPassword().equals(password)){
+            map.put("passwordMsg", "incorrect password");
+            return map;
+        }
+
+        //生成登陆凭证
+        LoginTicket loginTicket = new LoginTicket();
+        loginTicket.setUserId(user.getId());
+        loginTicket.setTicket(ForumxUtil.generateUUID());
+        loginTicket.setStatus(0);
+        loginTicket.setExpired(new Date(System.currentTimeMillis()+ expiredSeconds * 1000L));
+        loginTicketMapper.insertLoginTicket(loginTicket);
+
+        map.put("ticket",loginTicket.getTicket());
+        return map;
+
+    }
+
+
+    public void logout(String ticket){
+        loginTicketMapper.updateStatus(ticket,1);
     }
 }
