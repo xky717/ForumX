@@ -162,6 +162,11 @@ public class UserService implements ForumxConstant {
 
     }
 
+    //查询登陆凭证 loginTicket
+    public LoginTicket findloginTicket(String ticket){
+        return loginTicketMapper.selectByTicket(ticket);
+    }
+
 
     public void logout(String ticket){
         loginTicketMapper.updateStatus(ticket,1);
