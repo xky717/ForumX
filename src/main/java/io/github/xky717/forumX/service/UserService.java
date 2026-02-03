@@ -171,4 +171,8 @@ public class UserService implements ForumxConstant {
     public void logout(String ticket){
         loginTicketMapper.updateStatus(ticket,1);
     }
+
+    public int updateHeader(int userId, String headerUrl){
+       return userMapper.updateHeader(userId,headerUrl);
+    }
 }
