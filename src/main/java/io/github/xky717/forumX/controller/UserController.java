@@ -113,6 +113,19 @@ public class UserController {
         }
 
     }
+    // 修改密码
+  @RequestMapping(path="/updatePassword",method = RequestMethod.POST)
+    public String updatePassword(String oldPassword, String newPassword, Model model
+  ){
+        User user = hostHolder.getUser();
 
-
+       Map<String,Object> map = userService.updatePassword(user.getId(),oldPassword,newPassword);
+       if(map.isEmpty() || map == null){
+           return "redirect:/logout";
+       }else{
+           model.addAttribute("oldPasswordMsg",map.get("oldPasswordMsg"));
+           model.addAttribute("newPasswordMsg",map.get("newpasswordMsg"));
+           return "/site/setting";
+       }
+  }
 }

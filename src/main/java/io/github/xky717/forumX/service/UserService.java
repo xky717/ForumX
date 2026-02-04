@@ -204,4 +204,26 @@ public class UserService implements ForumxConstant {
         map.put("user", user);
         return map;
     }
+
+    //修改密码
+    public Map<String,Object> updatePassword(int userId, String oldPassword, String newPassword){
+        Map<String,Object> map = new HashMap<>();
+        if(StringUtils.isBlank(oldPassword)){
+            map.put("oldPasswordMsg","old password can not be empty!");
+        }
+        if(StringUtils.isBlank(newPassword)){
+            map.put("newPasswordMsg","new password can not be empty!");
+        }
+        User user = userMapper.selectById(userId);
+        oldPassword = ForumxUtil.md5(oldPassword + user.getSalt() );
+
+        if (!user.getPassword().equals(oldPassword)){
+            map.put("oldPasswordMsg","old password invalid");
+        }
+
+        newPassword = ForumxUtil.md5(newPassword + user.getSalt());
+        userMapper.updatePassword(userId,newPassword);
+        return map;
+
+    }
 }
