@@ -7,6 +7,10 @@ import java.util.UUID;
 
 public class ForumxUtil {
 
+    public static final int SUCCESS = 0;
+    public static final int ERROR = 1;
+
+
     //生随机字符串(激活码) oder 密码加盐
     public static String generateUUID(){
         return UUID.randomUUID().toString().replaceAll("-","");
@@ -20,4 +24,16 @@ public class ForumxUtil {
         return DigestUtils.md5DigestAsHex(key.getBytes());
     }
 
+    public static String getJSONString(int code) {
+        return getJSONString(code, null);
+    }
+
+    public static String getJSONString(int code, String msg) {
+        if (msg == null) {
+            return "{\"code\":" + code + "}";
+        }
+        return "{\"code\":" + code + ",\"msg\":\"" + msg + "\"}";
+    }
+
 }
+

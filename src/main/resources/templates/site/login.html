@@ -110,7 +110,7 @@
                                    id="remember-me" name="rememberMe"
                                    th:checked="${param.rememberMe}">
 							<label class="form-check-label" for="remember-me">remember me</label>
-							<a href="forget.html" class="text-danger float-right">forgot password?</a>
+							<a th:href="@{/forget}" class="text-danger float-right">forgot password?</a>
 						</div>
 					</div>				
 					<div class="form-group row mt-4">

@@ -1,5 +1,6 @@
 package io.github.xky717.forumX.controller;
 
+import io.github.xky717.forumX.dao.UserMapper;
 import io.github.xky717.forumX.entity.User;
 import io.github.xky717.forumX.service.UserService;
 import io.github.xky717.forumX.util.ForumxUtil;
@@ -22,6 +23,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/user")
@@ -43,6 +46,7 @@ public class UserController {
 
     @Autowired
     HostHolder hostHolder;
+
 
 
     @RequestMapping(path = "/setting")
@@ -109,4 +113,6 @@ public class UserController {
         }
 
     }
+
+
 }

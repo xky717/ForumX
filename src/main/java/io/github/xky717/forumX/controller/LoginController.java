@@ -4,22 +4,25 @@ import com.google.code.kaptcha.Producer;
 import io.github.xky717.forumX.entity.User;
 import io.github.xky717.forumX.service.UserService;
 import io.github.xky717.forumX.util.ForumxConstant;
+import io.github.xky717.forumX.util.ForumxUtil;
+import io.github.xky717.forumX.util.MailClient;
 import jakarta.servlet.http.Cookie;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.server.Session;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 import javax.imageio.ImageIO;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -29,13 +32,19 @@ import java.util.Map;
 @Controller
 public class LoginController implements ForumxConstant {
 
-    private Logger logger;
+    private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
     @Autowired
     private UserService userService;
 
     @Autowired
     private Producer kaptchaProducer;
+
+    @Autowired
+    private MailClient mailClient;
+
+    @Autowired
+    private TemplateEngine templateEngine;
 
     @Value("${server.servlet.context-path}")
     private String contextPath;
@@ -136,6 +145,54 @@ public class LoginController implements ForumxConstant {
     public String logout(@CookieValue("ticket") String ticket){
         userService.logout(ticket);
         return "redirect:/login";
+
+    }
+
+    //忘记密码页面
+   @RequestMapping(path = "/forget",method = RequestMethod.GET)
+    public String getForgetPage(){
+        return "/site/forget";
+   }
+
+   //获取验证码
+    @RequestMapping(path ="/forget/code",method = RequestMethod.GET)
+    @ResponseBody
+    public String getForgetCode(String email, HttpSession session){
+        if (StringUtils.isBlank(email)){
+            return ForumxUtil.getJSONString(0,"email can not be empty!");
+        }
+        Context context = new Context();
+        context.setVariable("email",email);
+        String code = ForumxUtil.generateUUID().substring(0,4);
+        context.setVariable("verifyCode",code);
+
+        String content = templateEngine.process("/mail/forget",context);
+        mailClient.sendMail(email,"forget passsword",content);
+
+        session.setAttribute("verifyCode",code);
+
+        return ForumxUtil.getJSONString(0);
+    }
+
+    @RequestMapping(path = "/forget/password",method = RequestMethod.POST)
+    public String resetPassword(String email, String verifyCode, String password, Model model, HttpSession session){
+
+        String code = (String)session.getAttribute("verifyCode");
+        if(StringUtils.isBlank(verifyCode) || StringUtils.isBlank(code) || !code.equalsIgnoreCase(verifyCode)){
+            model.addAttribute("codeMsg","code invalid");
+        }
+
+        Map<String,Object> map = userService.resetPassword(email,password);
+
+        if(map.containsKey("user")){
+            return "redirect:/login";
+        }else {
+            model.addAttribute("emailMsg",map.get("emailMsg"));
+            model.addAttribute("passwordMsg",map.get("passwordMsg"));
+            return "/site/forget";
+        }
+
+
 
     }
 
