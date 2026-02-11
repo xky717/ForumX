@@ -7,9 +7,11 @@ public class Comment {
     private int id;
     private int userId;
     private int entityType;
+    private int entityId;
     private int targetId;
     private String content;
     private int status;
+    private Date createTime;
 
 
 
@@ -69,7 +71,15 @@ public class Comment {
         this.createTime = createTime;
     }
 
-    private Date createTime;
+
+    public int getEntityId() {
+        return entityId;
+    }
+
+    public void setEntityId(int entityId) {
+        this.entityId = entityId;
+    }
+
 
     @Override
     public String toString() {
@@ -77,9 +87,11 @@ public class Comment {
                 "id=" + id +
                 ", userId=" + userId +
                 ", entityType=" + entityType +
+                ", entityId=" + entityId +
                 ", targetId=" + targetId +
                 ", content='" + content + '\'' +
                 ", status=" + status +
+                ", createTime=" + createTime +
                 ", createTime=" + createTime +
                 '}';
     }

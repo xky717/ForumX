@@ -4,9 +4,15 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="io.github.xky717.forumX.dao.CommentMapper">
 
-<sql id="selectFields">
+
+    <sql id="selectFields">
     id, user_id, entity_type, entity_id, target_id, content, status, create_time
-</sql>
+    </sql>
+
+    <sql id="insertFields">
+        user_id, entity_type, entity_id, target_id, content, status, create_time
+    </sql>
+
 
     <select id="selectCommentByEntity" resultType="Comment">
         select <include refid="selectFields"></include>
@@ -18,6 +24,7 @@
         limit #{offset}, #{limit}
     </select>
 
+
     <select id="selectCountByEntity" resultType="int">
         select count(id)
         from comment
@@ -26,6 +33,12 @@
         and entity_id = #{entityId}
     </select>
 
+    <insert id="insertComment" parameterType="Comment">
+        insert into comment(<include refid="insertFields"></include>)
+        values(#{userId}, #{entityType}, #{entityId}, #{targetId}, #{content}, #{status}, #{createTime})
+
+
+    </insert>
     
 </mapper>
 
