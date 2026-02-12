@@ -3,11 +3,14 @@ package io.github.xky717.forumX;
 
 import io.github.xky717.forumX.dao.DiscussPostMapper;
 import io.github.xky717.forumX.dao.LoginTicketMapper;
+import io.github.xky717.forumX.dao.MessageMapper;
 import io.github.xky717.forumX.dao.UserMapper;
 import io.github.xky717.forumX.entity.DiscussPost;
 import io.github.xky717.forumX.entity.LoginTicket;
+import io.github.xky717.forumX.entity.Message;
 import io.github.xky717.forumX.entity.User;
 import io.github.xky717.forumX.util.ForumxUtil;
+import jakarta.xml.bind.SchemaOutputResolver;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +36,9 @@ public class MapperTests {
 
     @Autowired
     private LoginTicketMapper loginTicketMapper;
+
+    @Autowired
+    private MessageMapper messageMapper;
 
     @Test
     public void testSelecetUser(){
@@ -130,6 +136,38 @@ public class MapperTests {
         loginTicketMapper.updateStatus("abc",0);
         loginTicket= loginTicketMapper.selectByTicket("abc");
         System.out.println(loginTicket);
+    }
+
+    @Test
+    public void testUpdateUserStatus(){
+        User user = userMapper.selectById(154);
+        System.out.println("userStatus"+ user.getStatus());
+        userMapper.updateStatus(154,1);
+
+        System.out.println("userName"+ user.getUsername());
+        System.out.println("userStatus"+ user.getStatus());
+
+
+    }
+
+    @Test
+    public void testSelectMapper(){
+        List<Message> list = messageMapper.selectConversations(111,0,20);
+        for (Message message : list){
+            System.out.println(message);
+        }
+       int count = messageMapper.selectConversationCount(111);
+        System.out.println(count);
+
+        list = messageMapper.selectLetters("111_112",0,10);
+        for (Message message : list){
+            System.out.println(message);
+        }
+        count = messageMapper.selectLetterCount("111_112");
+        System.out.println(count);
+
+        count = messageMapper.selectLetterUnreadCount(131,"111_131");
+        System.out.println(count);
     }
 
 }
