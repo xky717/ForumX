@@ -47,6 +47,10 @@ public class UserService implements ForumxConstant {
         return userMapper.selectById(id);
     }
 
+    public User findUserByName(String name){
+        return userMapper.selectByName(name);
+    }
+
     public Map<String,Object> register(User user){
         Map<String,Object> map = new HashMap<>();
 
