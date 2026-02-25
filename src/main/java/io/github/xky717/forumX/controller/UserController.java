@@ -2,6 +2,7 @@ package io.github.xky717.forumX.controller;
 
 import io.github.xky717.forumX.dao.UserMapper;
 import io.github.xky717.forumX.entity.User;
+import io.github.xky717.forumX.service.LikeService;
 import io.github.xky717.forumX.service.UserService;
 import io.github.xky717.forumX.util.ForumxUtil;
 import io.github.xky717.forumX.util.HostHolder;
@@ -42,10 +43,14 @@ public class UserController {
     private String contextPath;
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @Autowired
-    HostHolder hostHolder;
+    private HostHolder hostHolder;
+
+    @Autowired
+    private LikeService likeService;
+
 
 
 
@@ -128,4 +133,21 @@ public class UserController {
            return "/site/setting";
        }
   }
+
+  //个人主页
+    @RequestMapping(path = "/profile/{userId}", method = RequestMethod.GET)
+    public String getProfilePage(@PathVariable("userId") int userId, Model model){
+        User user = userService.findUserById(userId);
+        if (user == null){
+            throw new RuntimeException("this user does not exist.");
+        }
+        //用户
+        model.addAttribute("user",user);
+        //用户获得的赞
+        int likeCount = likeService.findUserLikeCount(userId);
+        model.addAttribute("likeCount",likeCount);
+
+        return "/site/profile";
+
+    }
 }
