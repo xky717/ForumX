@@ -2,7 +2,6 @@ package io.github.xky717.forumX.controller;
 
 import io.github.xky717.forumX.entity.Comment;
 import io.github.xky717.forumX.service.CommentService;
-import io.github.xky717.forumX.service.DiscussPostService;
 import io.github.xky717.forumX.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -28,6 +27,7 @@ public class CommentController {
         comment.setStatus(0);
         comment.setCreateTime(new Date());
         commentService.addComment(comment);
+
 
         return  "redirect:/discuss/detail/" +discussPostId;
     }

@@ -19,7 +19,7 @@ public class ExceptionAdvice {
     @ExceptionHandler
     public void handleException(Exception e, HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-        logger.error("service error:", e.getMessage());
+        logger.error("service error: {}", e.getMessage(), e);
         for(StackTraceElement element : e.getStackTrace()){
             logger.error(element.toString());
         }
