@@ -2,8 +2,10 @@ package io.github.xky717.forumX.controller;
 
 import io.github.xky717.forumX.dao.UserMapper;
 import io.github.xky717.forumX.entity.User;
+import io.github.xky717.forumX.service.FollowService;
 import io.github.xky717.forumX.service.LikeService;
 import io.github.xky717.forumX.service.UserService;
+import io.github.xky717.forumX.util.ForumxConstant;
 import io.github.xky717.forumX.util.ForumxUtil;
 import io.github.xky717.forumX.util.HostHolder;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,7 +31,7 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/user")
-public class UserController {
+public class UserController implements ForumxConstant {
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
@@ -50,6 +52,9 @@ public class UserController {
 
     @Autowired
     private LikeService likeService;
+
+    @Autowired
+    private FollowService followService;
 
 
 
@@ -146,8 +151,19 @@ public class UserController {
         //用户获得的赞
         int likeCount = likeService.findUserLikeCount(userId);
         model.addAttribute("likeCount",likeCount);
+        //关注数量
+        long followeeCount = followService.findFolloweeCount(userId,ENTITY_TYPE_USER);
+        model.addAttribute("followeeCount",followeeCount);
+        //粉丝数量
+        long followerCount = followService.findFollowerCount(ENTITY_TYPE_USER,userId);
+        model.addAttribute("followerCount",followerCount);
+        //当前登录用户对该用户是否已关注
+        boolean hasFollowed = false;
+        if (hostHolder.getUser() != null){
+            hasFollowed = followService.hasFollowed(hostHolder.getUser().getId(),ENTITY_TYPE_USER,userId);
+        }
+        model.addAttribute("hasFollowed",hasFollowed);
 
         return "/site/profile";
-
     }
 }

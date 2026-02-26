@@ -26,12 +26,12 @@ public class CommentService implements ForumxConstant {
     @Autowired
     private DiscussPostMapper discussPostMapper;
 
-    public List<Comment> findCommentByEntity(int entityTyp, int entityId, int offset, int limit){
-        return commentMapper.selectCommentByEntity(entityTyp, entityId, offset, limit);
+    public List<Comment> findCommentByEntity(int entityType, int entityId, int offset, int limit){
+        return commentMapper.selectCommentByEntity(entityType, entityId, offset, limit);
     }
 
-    public int findCommentCount(int entityTyp, int entityId){
-        return commentMapper.selectCountByEntity(entityTyp, entityId);
+    public int findCommentCount(int entityType, int entityId){
+        return commentMapper.selectCountByEntity(entityType, entityId);
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)

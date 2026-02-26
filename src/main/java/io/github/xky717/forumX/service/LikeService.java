@@ -16,11 +16,11 @@ public class LikeService {
     private RedisTemplate redisTemplate;
 
 
-    public void like(int userId, int entityTpy, int entityId, int entityUserId){
+    public void like(int userId, int entityType, int entityId, int entityUserId){
         redisTemplate.execute(new SessionCallback() {
             @Override
             public Object execute(RedisOperations operations) throws DataAccessException {
-                String entityLikeKey = RedisKeyUtils.getEntityLikeKey(entityTpy,entityId);
+                String entityLikeKey = RedisKeyUtils.getEntityLikeKey(entityType,entityId);
                 String userLikeKey = RedisKeyUtils.getUserLikeKey(entityUserId);
                 boolean isMember =  operations.opsForSet().isMember(entityLikeKey,userId);
 
@@ -41,14 +41,14 @@ public class LikeService {
     }
 
     //查询某实体的点赞量
-    public long findEntityLikeCount(int entityTyp, int entityId){
-        String entityLikeKey = RedisKeyUtils.getEntityLikeKey(entityTyp,entityId);
+    public long findEntityLikeCount(int entityType, int entityId){
+        String entityLikeKey = RedisKeyUtils.getEntityLikeKey(entityType,entityId);
         return redisTemplate.opsForSet().size(entityLikeKey);
     }
 
     //查询某用户对某实体的点赞状态
-    public int findEntityLikeStatus(int userId, int entityTyp, int entityId){
-        String entityLikeKey = RedisKeyUtils.getEntityLikeKey(entityTyp,entityId);
+    public int findEntityLikeStatus(int userId, int entityType, int entityId){
+        String entityLikeKey = RedisKeyUtils.getEntityLikeKey(entityType,entityId);
         return redisTemplate.opsForSet().isMember(entityLikeKey,userId)? 1 : 0 ;
     }
 
