@@ -22,8 +22,8 @@ public class RedisKeyUtils {
 
     //某个用户关注的实体
     //followee:userId:entityType -> z set(entityId,now)
-    public static String getFolloweeKey(int userId, int entityType){
-        return PREFIX_FOLLOWEE + SPLIT + userId + SPLIT + entityType;
+    public static String getFolloweeKey(int entityType, int userId){
+        return PREFIX_FOLLOWEE + SPLIT + entityType + SPLIT + userId;
     }
 
     //某个实体拥有的粉丝
