@@ -6,6 +6,7 @@ import io.github.xky717.forumX.service.UserService;
 import io.github.xky717.forumX.util.ForumxConstant;
 import io.github.xky717.forumX.util.ForumxUtil;
 import io.github.xky717.forumX.util.MailClient;
+import io.github.xky717.forumX.util.RedisKeyUtils;
 import jakarta.servlet.http.Cookie;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.server.Session;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +29,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 
 @Controller
@@ -45,6 +48,9 @@ public class LoginController implements ForumxConstant {
 
     @Autowired
     private TemplateEngine templateEngine;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @Value("${server.servlet.context-path}")
     private String contextPath;
@@ -71,6 +77,7 @@ public class LoginController implements ForumxConstant {
 
             return "/site/register";
         }
+
     }
     //http://localhost:8080/forumx/activation/101(用户id)/code(激活码)
     @RequestMapping(path= "http://localhost:8080/forumx/activation/{userId}/{code}",method = RequestMethod.GET)
@@ -94,14 +101,23 @@ public class LoginController implements ForumxConstant {
     }
 
     @RequestMapping(path = "/kaptcha",method = RequestMethod.GET)
-    public void getKaptcha(HttpServletResponse response, HttpSession session) throws IOException {
+    public void getKaptcha(HttpServletResponse response/*, HttpSession session*/) throws IOException {
         //生成验证码
         String text = kaptchaProducer.createText();
         BufferedImage image = kaptchaProducer.createImage(text);
 
         //验证码存入session
-        session.setAttribute("kaptcha",text);
+        //session.setAttribute("kaptcha",text);
+        //验证码的归属
+        String kapthcaOwner = ForumxUtil.generateUUID();
+        Cookie cookie = new Cookie("kapthcaOwner",kapthcaOwner);
+        cookie.setMaxAge(60);
+        cookie.setPath(contextPath);
+        response.addCookie(cookie);
 
+        //将验证码存到redis
+        String redisKey = RedisKeyUtils.getKaptchaKey(kapthcaOwner);
+        redisTemplate.opsForValue().set(redisKey,text,60, TimeUnit.SECONDS);
         //将图片输出给浏览器
         response.setContentType("image/png");
 
@@ -116,10 +132,16 @@ public class LoginController implements ForumxConstant {
 
     @RequestMapping(path = "/login", method = RequestMethod.POST)
     public String login(String username, String password, String code, boolean rememberMe,
-                        Model model, HttpSession session, HttpServletResponse response){
+                        Model model/*, HttpSession session*/, HttpServletResponse response,
+                        @CookieValue("kapthcaOwner") String kapthcaOwner){
 
         //检查验证码
-        String kaptcha = session.getAttribute("kaptcha").toString();
+       // String kaptcha = session.getAttribute("kaptcha").toString();
+        String kaptcha = null;
+        if (StringUtils.isNotBlank(kapthcaOwner)){
+            String redisKey = RedisKeyUtils.getKaptchaKey(kapthcaOwner);
+            kaptcha = (String) redisTemplate.opsForValue().get(redisKey);
+        }
         if (StringUtils.isBlank(kaptcha)|| StringUtils.isBlank(code)|| !kaptcha.equalsIgnoreCase(code)){
             model.addAttribute("codeMsg","code invalid");
             return "/site/login";

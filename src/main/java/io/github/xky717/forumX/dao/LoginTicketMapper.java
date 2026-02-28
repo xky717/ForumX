@@ -4,7 +4,7 @@ import io.github.xky717.forumX.entity.LoginTicket;
 import org.apache.ibatis.annotations.*;
 
 @Mapper
-
+@Deprecated
 public interface LoginTicketMapper {
 
     @Insert({
