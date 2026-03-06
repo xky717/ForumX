@@ -1,6 +1,7 @@
 package io.github.xky717.forumX.config;
 
 import io.github.xky717.forumX.controller.interceptor.LoginTicketInterceptor;
+import io.github.xky717.forumX.controller.interceptor.MessageInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -12,9 +13,15 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Autowired
     private LoginTicketInterceptor loginTicketInterceptor;
 
+    @Autowired
+    private MessageInterceptor messageInterceptor;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(loginTicketInterceptor)
+                .excludePathPatterns("/**/*.css","/**/*.png","/**/*.jpg","/**/*.jpeg");
+
+        registry.addInterceptor(messageInterceptor)
                 .excludePathPatterns("/**/*.css","/**/*.png","/**/*.jpg","/**/*.jpeg");
 
     }

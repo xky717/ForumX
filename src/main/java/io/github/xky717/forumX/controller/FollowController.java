@@ -1,7 +1,9 @@
 package io.github.xky717.forumX.controller;
 
+import io.github.xky717.forumX.entity.Event;
 import io.github.xky717.forumX.entity.Page;
 import io.github.xky717.forumX.entity.User;
+import io.github.xky717.forumX.event.EventProducer;
 import io.github.xky717.forumX.service.FollowService;
 import io.github.xky717.forumX.service.UserService;
 import io.github.xky717.forumX.util.ForumxConstant;
@@ -28,6 +30,8 @@ public class FollowController implements ForumxConstant{
     private HostHolder hostHolder;
     @Autowired
     private UserService userService;
+    @Autowired
+    private EventProducer eventProducer;
 
 
     @RequestMapping(path = "/follow", method = RequestMethod.POST)
@@ -38,6 +42,15 @@ public class FollowController implements ForumxConstant{
             throw new RuntimeException("this user does not exist");
         }
         followService.follow(user.getId(), entityType, entityId);
+        //出发关注事件
+        Event event = new Event()
+                .setTopic(TOPIC_FOLLOW)
+                .setUserId(hostHolder.getUser().getId())
+                .setEntityType(entityType)
+                .setEntityId(entityId)
+                .setEntityUserId(entityId);
+        eventProducer.fireEvent(event);
+
         return ForumxUtil.getJSONString(0, "followed!");
     }
 

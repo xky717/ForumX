@@ -26,6 +26,8 @@ public class CommentService implements ForumxConstant {
     @Autowired
     private DiscussPostMapper discussPostMapper;
 
+
+
     public List<Comment> findCommentByEntity(int entityType, int entityId, int offset, int limit){
         return commentMapper.selectCommentByEntity(entityType, entityId, offset, limit);
     }
@@ -50,5 +52,9 @@ public class CommentService implements ForumxConstant {
             discussPostMapper.updateCommentCount(comment.getId(),count);
         }
         return rows;
+    }
+
+    public Comment findCommentById(int id){
+        return commentMapper.selectCommentById(id);
     }
 }

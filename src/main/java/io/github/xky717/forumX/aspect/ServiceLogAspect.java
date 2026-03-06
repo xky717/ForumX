@@ -26,6 +26,9 @@ public class ServiceLogAspect {
     public void before(JoinPoint joinPoint){
         //日志格式：用户[ip=1.2.3.4]，访问了[target = io.github.xky717.forumX.service.xxx()，在[now=什么时间]]
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if(attributes == null){
+            return;
+        }
         HttpServletRequest request =attributes.getRequest();
         String ip = request.getRemoteHost();
         String now = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(new Date());

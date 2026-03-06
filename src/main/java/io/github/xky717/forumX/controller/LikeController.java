@@ -1,7 +1,10 @@
 package io.github.xky717.forumX.controller;
 
+import io.github.xky717.forumX.entity.Event;
 import io.github.xky717.forumX.entity.User;
+import io.github.xky717.forumX.event.EventProducer;
 import io.github.xky717.forumX.service.LikeService;
+import io.github.xky717.forumX.util.ForumxConstant;
 import io.github.xky717.forumX.util.ForumxUtil;
 import io.github.xky717.forumX.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,16 +17,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Controller
-public class LikeController {
+public class LikeController implements ForumxConstant {
 
     @Autowired
     private LikeService likeService;
     @Autowired
     private HostHolder hostHolder;
+    @Autowired
+    private EventProducer eventProducer;
 
     @RequestMapping(path = "/like", method = RequestMethod.POST)
     @ResponseBody
-    public String like(int entityType, int entityId, int entityUserId){
+    public String like(int entityType, int entityId, int entityUserId, int postId){
         User user = hostHolder.getUser();
         //点赞
         likeService.like(user.getId(), entityType, entityId, entityUserId);
@@ -39,7 +44,16 @@ public class LikeController {
         map.put("likeCount", likeCount);
         map.put("likeStatus",likeStatus);
 
+        //触发点赞事件
+        if (likeStatus == 1){
+            Event event = new Event()
+                    .setTopic(TOPIC_LIKE)
+                    .setUserId(hostHolder.getUser().getId())
+                    .setEntityType(entityType)
+                    .setEntityUserId(entityUserId)
+                    .setData("postId", postId);
+            eventProducer.fireEvent(event);
+        }
         return ForumxUtil.getJSONString(0,null,map);
-
     }
 }

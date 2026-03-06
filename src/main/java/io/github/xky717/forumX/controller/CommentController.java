@@ -1,7 +1,12 @@
 package io.github.xky717.forumX.controller;
 
 import io.github.xky717.forumX.entity.Comment;
+import io.github.xky717.forumX.entity.DiscussPost;
+import io.github.xky717.forumX.entity.Event;
+import io.github.xky717.forumX.event.EventProducer;
 import io.github.xky717.forumX.service.CommentService;
+import io.github.xky717.forumX.service.DiscussPostService;
+import io.github.xky717.forumX.util.ForumxConstant;
 import io.github.xky717.forumX.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -13,7 +18,7 @@ import java.util.Date;
 
 @Controller
 @RequestMapping("/comment")
-public class CommentController {
+public class CommentController implements ForumxConstant {
 
     @Autowired
     private HostHolder hostHolder;
@@ -21,14 +26,40 @@ public class CommentController {
     @Autowired
     private CommentService commentService;
 
+    @Autowired
+    private EventProducer eventProducer;
+
+    @Autowired
+    private DiscussPostService discussPostService;
+
+
     @RequestMapping(path = "/add/{discussPostId}", method = RequestMethod.POST)
     public String addComment(@PathVariable("discussPostId") int discussPostId, Comment comment){
         comment.setUserId(hostHolder.getUser().getId());
         comment.setStatus(0);
         comment.setCreateTime(new Date());
         commentService.addComment(comment);
-
+        //触发评论事件
+        Event event = new Event()
+                .setTopic(TOPIC_COMMENT)
+                .setUserId(hostHolder.getUser().getId())
+                .setEntityType(comment.getEntityType())
+                .setEntityId(comment.getEntityId())
+                .setData("postId", discussPostId);
+        if (comment.getEntityType() == ENTITY_TYPE_POST){
+            DiscussPost target = discussPostService.findDiscussPostById(comment.getEntityId());
+            event.setEntityUserId(target.getUserId());
+        }else if (comment.getEntityType() == ENTITY_TYPE_COMMENT){
+            Comment target = commentService.findCommentById(comment.getEntityId());
+            event.setEntityUserId(target.getUserId());
+        }
+        System.out.println("=== addComment called ===");
+        System.out.println("discussPostId = " + discussPostId);
+        eventProducer.fireEvent(event);
+        System.out.println("event postId = " + event.getData().get("postId"));
 
         return  "redirect:/discuss/detail/" +discussPostId;
     }
+
+
 }

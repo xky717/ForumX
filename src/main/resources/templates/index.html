@@ -6,7 +6,7 @@
 	<link rel="icon" href="https://static.nowcoder.com/images/logo_87_87.png"/>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" crossorigin="anonymous">
 	<link rel="stylesheet" th:href="@{/css/global.css}" />
-	<title>牛客网-首页</title>
+	<title>ForumX - Homepage</title>
 </head>
 <body>	
 	<div class="nk-container">
@@ -27,7 +27,7 @@
 								<a class="nav-link" th:href="@{/index}">Homepage</a>
 							</li>
 							<li class="nav-item ml-3 btn-group-vertical" th:if="${loginUser!=null}">
-								<a class="nav-link position-relative" th:href="@{/letter/list}">消息<span class="badge badge-danger">12</span></a>
+								<a class="nav-link position-relative" th:href="@{/letter/list}">messages<span class="badge badge-danger" th:text="${allUnreadCount!=0? allUnreadCount:''}">12</span></a>
 							</li>
 							<li class="nav-item ml-3 btn-group-vertical"  th:if="${loginUser==null}">
 								<a class="nav-link" th:href="@{/register}">Register</a>
