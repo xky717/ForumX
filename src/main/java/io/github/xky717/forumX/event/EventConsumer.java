@@ -1,8 +1,11 @@
 package io.github.xky717.forumX.event;
 
 import com.alibaba.fastjson2.JSONObject;
+import io.github.xky717.forumX.entity.DiscussPost;
 import io.github.xky717.forumX.entity.Event;
 import io.github.xky717.forumX.entity.Message;
+import io.github.xky717.forumX.service.DiscussPostService;
+import io.github.xky717.forumX.service.ElasticsearchService;
 import io.github.xky717.forumX.service.MessageService;
 import io.github.xky717.forumX.util.ForumxConstant;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -23,6 +26,12 @@ public class EventConsumer implements ForumxConstant {
 
     @Autowired
     private MessageService messageService;
+
+    @Autowired
+    private DiscussPostService discussPostService;
+
+    @Autowired
+    private ElasticsearchService elasticsearchService;
 
     @KafkaListener(topics = {TOPIC_COMMENT,TOPIC_LIKE,TOPIC_FOLLOW})
     public void handleCommentMessage(ConsumerRecord record){
@@ -57,6 +66,24 @@ public class EventConsumer implements ForumxConstant {
 
         message.setContent(JSONObject.toJSONString(content));
         messageService.addMessage(message);
+
+    }
+    //消费发帖
+    @KafkaListener(topics = {TOPIC_PUBLISH})
+    public void handlePublishMessage(ConsumerRecord record){
+        if (record == null || record.value() == null){
+            logger.error("empty message.");
+            return;
+        }
+
+        Event event = JSONObject.parseObject(record.value().toString(), Event.class);
+        if (event == null) {
+            logger.error("message format error.");
+            return;
+        }
+
+        DiscussPost discussPost = discussPostService.findDiscussPostById(event.getEntityId());
+        elasticsearchService.saveDiscussPost(discussPost);
 
     }
 }

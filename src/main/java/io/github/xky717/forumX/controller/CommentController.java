@@ -53,10 +53,18 @@ public class CommentController implements ForumxConstant {
             Comment target = commentService.findCommentById(comment.getEntityId());
             event.setEntityUserId(target.getUserId());
         }
-        System.out.println("=== addComment called ===");
-        System.out.println("discussPostId = " + discussPostId);
         eventProducer.fireEvent(event);
-        System.out.println("event postId = " + event.getData().get("postId"));
+
+        if (comment.getEntityType() == ENTITY_TYPE_POST ){
+             event = new Event()
+                    .setTopic(TOPIC_PUBLISH)
+                    .setUserId(comment.getUserId())
+                    .setEntityType(ENTITY_TYPE_POST)
+                    .setEntityId(discussPostId);
+            eventProducer.fireEvent(event);
+
+        }
+
 
         return  "redirect:/discuss/detail/" +discussPostId;
     }

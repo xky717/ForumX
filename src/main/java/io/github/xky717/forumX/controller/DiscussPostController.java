@@ -1,10 +1,8 @@
 package io.github.xky717.forumX.controller;
 
 import io.github.xky717.forumX.dao.CommentMapper;
-import io.github.xky717.forumX.entity.Comment;
-import io.github.xky717.forumX.entity.DiscussPost;
-import io.github.xky717.forumX.entity.Page;
-import io.github.xky717.forumX.entity.User;
+import io.github.xky717.forumX.entity.*;
+import io.github.xky717.forumX.event.EventProducer;
 import io.github.xky717.forumX.service.CommentService;
 import io.github.xky717.forumX.service.DiscussPostService;
 import io.github.xky717.forumX.service.LikeService;
@@ -40,6 +38,9 @@ public class DiscussPostController implements ForumxConstant {
     @Autowired
     private LikeService likeService;
 
+    @Autowired
+    private EventProducer eventProducer;
+
     @RequestMapping(path = "/add",method = RequestMethod.POST)
     @ResponseBody
     public String addDiscussPost(String title, String content){
@@ -55,6 +56,15 @@ public class DiscussPostController implements ForumxConstant {
         post.setContent(content);
         post.setCreateTime(new Date());
         discussPostService.addDiscussPost(post);
+
+        //触发发帖事件
+        Event event = new Event()
+                .setTopic(TOPIC_PUBLISH)
+                .setUserId(user.getId())
+                .setEntityType(ENTITY_TYPE_POST)
+                .setEntityId(post.getId());
+        eventProducer.fireEvent(event);
+
 
         //错误后面统一处理
         return ForumxUtil.getJSONString(0,"the post was successfully published.");
